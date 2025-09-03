@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+echo "== Sync"
+
+# Exit if any command returns a non-zero status
+set -e
+
+# Checks if an argument is an empty string or not
+if [[ -z "$1" ]] ;
+  then
+    echo "No bucket name provided eg. ./bucket my-bucket-name"
+    exit 1
+fi
+
+# Checks for filename prefix
+if [[ -z "$2" ]] ;
+  then
+    echo "No bucket name provided eg. ./bucket my-bucket-name"
+    exit 1
+fi
+
+BUCKET_NAME=$1
+FILENAME_PREFIX=$2
+
+# where the random files are stored
+OUTPUT_DIR="/tmp/s3-bash_Scripts"
+
+# remove folder if it already exists
+rm -r $OUTPUT_DIR
+
+# creating an output folder
+mkdir -p $OUTPUT_DIR
+
+# Generating a certain random number of files
+RAN_FILES=$((RANDOM % 6 + 5))
+
+# Will generate random data for each file until it meets
+# The total number of random file 
+
+for ((i=1; i<=$RAN_FILES; i++)); do 
+    # random file names
+    FILENAME="$OUTPUT_DIR/FILENAME_PREFIX_$i.txt"
+
+    # Random data that will be written to a file
+    dd if=/dev/urandom of="$FILENAME" bs=1024 count=$((RANDOM % 1024 + 1)) 2>/dev/null
+done
+
+aws s3 sync $OUTPUT_DIR s3://$BUCKET_NAME/files
